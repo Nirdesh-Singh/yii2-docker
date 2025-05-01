@@ -1,34 +1,41 @@
-- hosts: web
+- hosts: local
   become: yes
   tasks:
     - name: Install Docker
-      apt:
-        name: docker.io
+      yum:
+        name: docker
         state: present
-        update_cache: yes
+
+    - name: Start and enable Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
 
     - name: Install Docker Compose
-      apt:
-        name: docker-compose
-        state: present
+      get_url:
+        url: https://github.com/docker/compose/releases/download/v2.24.4/docker-compose-linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
 
     - name: Install NGINX
-      apt:
+      yum:
         name: nginx
         state: present
 
     - name: Copy NGINX config
       copy:
-        src: ../nginx/default.conf
-        dest: /etc/nginx/sites-available/default
+        src: default.conf
+        dest: /etc/nginx/conf.d/yii2.conf
         owner: root
         group: root
         mode: 0644
 
     - name: Restart NGINX
-      service:
+      systemd:
         name: nginx
         state: restarted
+        enabled: yes
 
     - name: Initialize Docker Swarm
-      shell: docker swarm init || true
+      shell: "docker info | grep 'Swarm: active' || docker swarm init"
