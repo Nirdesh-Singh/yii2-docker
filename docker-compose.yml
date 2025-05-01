@@ -1,0 +1,15 @@
+# File: docker-compose.yml
+version: '3.8'
+
+services:
+  yii2-app:
+    build: .
+    image: yii2-app:latest  # change "myusername" to your DockerHub username later
+    ports:
+      - "8080:80"
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

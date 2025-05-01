@@ -1,0 +1,34 @@
+- hosts: web
+  become: yes
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Install Docker Compose
+      apt:
+        name: docker-compose
+        state: present
+
+    - name: Install NGINX
+      apt:
+        name: nginx
+        state: present
+
+    - name: Copy NGINX config
+      copy:
+        src: ../nginx/default.conf
+        dest: /etc/nginx/sites-available/default
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Restart NGINX
+      service:
+        name: nginx
+        state: restarted
+
+    - name: Initialize Docker Swarm
+      shell: docker swarm init || true
